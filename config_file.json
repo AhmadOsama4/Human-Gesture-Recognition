@@ -1,0 +1,27 @@
+{
+	"model_path": "",
+	"mouse":{
+			"0": "left_click",
+			"1": "right_click",
+			"2": "double_click",
+			"3": "track",
+			"4": "KEYBOARD"
+		},
+
+	"keyboard":{
+			"0": "up",
+			"1": "down",
+			"2": "left",
+			"3": "right",
+			"4": "INTERMEDIATE"
+	},
+	"intermediate":{
+			"0": "MOUSE",
+			"1": "DYNAMIC"
+	},
+	"dynamic":{
+		"algorithm": "hmm"
+
+	}
+
+}
