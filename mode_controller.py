@@ -2,6 +2,7 @@ from keras.models import load_model
 from gloves import Gloves
 from config import process_config
 import numpy as np
+from computer_controller import ComputerController
 import os
 import time
 import pickle
@@ -55,12 +56,14 @@ class ModeController:
 
     def start(self):
         camera = cv2.VideoCapture(0)
+        camera_w, camera_h = self.gloves.get_camera_dimensions()
         while True:
             if self.current_mode == MODE.DYNAMIC: # Capture 31 frames for classification
                 #TODO: wait for t periods, and beep
                 centers = []
                 for i in range(31):
                     ret_val, image = camera.read()
+                    image = cv2.flip(image, 1)
                     preprocessed_image, _ = self.gloves.preprocess_image(image)
                     center = self.gloves.get_hand_center(preprocessed_image)
                     centers.append(center)
@@ -71,19 +74,33 @@ class ModeController:
 
             else: # predict the static gesture
                 ret_val, image = camera.read()
+                image = cv2.flip(image, 1)
                 preprocessed_image, keras_image = self.gloves.preprocess_image(image)
 
                 prediction = self.predict(keras_image)
+                dst, center_x, center_y = self.gloves.get_hand_center(preprocessed_image)
                 next_mode = self.current_mode
 
-                if self.current_mode == MODE.KEYBOARD:
-                    (next_mode, action) = self.mouse_controller.take_action(prediction)
-                elif self.current_mode == MODE.MOUSE:
-                    (next_mode, action) = self.keyboard_controller.take_action(prediction)
-                elif self.current_mode == MODE.DYNAMIC:
-                    (next_mode, action) = self.dynamic_controller.take_action(prediction)
+                print(prediction)
+                self.current_mode = MODE.MOUSE
 
-                eval(action)
+                if self.current_mode == MODE.KEYBOARD:
+                    pass
+                    #next_mode = self.keyboard_controller.take_action(prediction)
+                    #(next_mode, action) = self.mouse_controller.take_action(prediction)
+                elif self.current_mode == MODE.MOUSE:
+                    print('Center', center_x, center_y)
+                    next_mode = self.mouse_controller.take_action(prediction, center_x, center_y, 640, 480)
+                    #(next_mode, action) = self.keyboard_controller.take_action(prediction)
+                elif self.current_mode == MODE.DYNAMIC:
+                    pass
+                    #next_mode = self.dynamic_controller.take_action(prediction)
+                    #(next_mode, action) = self.dynamic_controller.take_action(prediction)
+
+                cv2.imshow('contour', dst)
+                cv2.imshow('result', preprocessed_image)
+                cv2.waitKey(20)
+                #eval(action)
                 self.current_mode = next_mode
 
     def predict(self, image):

@@ -77,6 +77,7 @@ class Gloves:
         samples = samples.reshape(1, -1, 3)
         samples = cv2.cvtColor(samples, cv2.COLOR_BGR2HSV)
         camera.release()
+        cv2.destroyWindow('img')
 
         return image, samples, masked
 
@@ -125,6 +126,8 @@ class Gloves:
         final_mask = self.classify_gmm(image)
         new = cv2.resize(final_mask, (w, h))
 
+        print('Dimensions:', w, h)
+
         img_dim = (64, 64)
         keras_img = cv2.resize(new, img_dim)
         keras_img = keras_img.reshape((1,) + keras_img.shape + (1,))
@@ -155,7 +158,7 @@ class Gloves:
         cy = int(mom['m01'] / mom['m00'])
 
         cv2.circle(dst, (cx, cy), 10, (0, 0, 255), -1)
-        return cx, cy
+        return dst, cx, cy
 
     def get_camera_dimensions(self):
         return self.camera_width, self.camera_height

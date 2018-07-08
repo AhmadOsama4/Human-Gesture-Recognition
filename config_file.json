@@ -1,23 +1,22 @@
 {
 	"static_model_path": "os.path.join(os.getcwd(), 'models', 'static_model.h5')",
 	"mouse":{
-			"0": "left_click",
-			"1": "right_click",
+			"0": "KEYBOARD",
+			"1": "left_click",
 			"2": "double_click",
 			"3": "track",
-			"4": "KEYBOARD"
-		},
-
+			"4": "right_click"
+    },
 	"keyboard":{
-			"0": "up",
-			"1": "down",
-			"2": "left",
-			"3": "right",
+			"0": "INTERMEDIATE",
+			"1": "up",
+			"2": "down",
+			"3": "INTERMEDIATE",
 			"4": "INTERMEDIATE"
 	},
 	"intermediate":{
-			"0": "MOUSE",
-			"1": "DYNAMIC"
+			"1": "MOUSE",
+			"2": "DYNAMIC"
 	},
 	"dynamic":{
 		"algorithm": "hmm"
