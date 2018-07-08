@@ -1,5 +1,5 @@
 {
-	"model_path": "",
+	"static_model_path": "os.path.join(os.getcwd(), 'models', 'static_model.h5')",
 	"mouse":{
 			"0": "left_click",
 			"1": "right_click",

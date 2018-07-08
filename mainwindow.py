@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget #, QPushButton, Q
 from PyQt5.QtWidgets import QGridLayout #, QLabel, QVBoxLayout, QGroupBox
 # from PyQt5.QtCore import QThread
 from gloves_icon import GlovesIcon
+from mode_controller import ModeController
 import os
 import sys
 
@@ -10,6 +11,8 @@ class window(QMainWindow):
         super(window, self).__init__()
         self.setGeometry(50, 50, 720, 720)
         self.setWindowTitle('Gesture Recognition')
+
+        self.mode_controller = None
 
         self.central_widget = QWidget()
         self.grid_layout = QGridLayout()
@@ -22,29 +25,34 @@ class window(QMainWindow):
         self.show()
 
     def add_gloves_icons(self):
-        images_path = os.path.join(os.getcwd(), 'Images')
+        images_path = os.path.join(os.getcwd(), 'Gloves')
         paths = os.listdir(images_path)
 
         #saved gloves
         indx = 0
         for image in paths:
+            if image[-4:] != '.jpg' and image[-4:] != '.png': #consider jpg images only
+                continue
             glove_name = image[:-4]
             print(glove_name)
             gloves_icon = GlovesIcon(glove_name)
             gloves_icon.clicked.connect(self.gestureSelected)
 
-            i = indx / 2
-            j = indx % 2
+            i = indx / 3
+            j = indx % 3
 
             self.grid_layout.addWidget(gloves_icon, i, j)
 
             indx += 1
 
     def gestureSelected(self, gloves_name):
-        if gloves_name == "new_gesture_icon":
-            pass
+        configuration_file_path = os.path.join(os.getcwd(), "config_file.json")
+        if gloves_name == "new_gloves_icon":
+            print('Add a new glove')
+            self.mode_controller = ModeController(configuration_file_path, None)
         else:
-            print('Gesture Selected:', gloves_name)
+            print('Load a saved glove')
+            self.mode_controller = ModeController(configuration_file_path, gloves_name)
 
 
 if __name__ == "__main__":

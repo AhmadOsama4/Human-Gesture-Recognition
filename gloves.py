@@ -5,8 +5,8 @@ import time
 from sklearn.mixture import GaussianMixture,BayesianGaussianMixture
 
 class Gloves:
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     def __init__(self):
-        self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         self.camera_width = None
         self.camera_height = None
 
