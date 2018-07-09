@@ -137,7 +137,8 @@ class Gloves:
         # return image and a preprocessed image for keras
         return new, keras_img
 
-    def get_hand_center(self, img):
+    def get_hand_center(self, image):
+        img  = image.copy()
         h, w = img.shape
         # find contours
         _, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -151,13 +152,16 @@ class Gloves:
                 max_area = area
                 best_cnt = cnt
 
-        cv2.drawContours(dst, [best_cnt], 0, (255, 0, 0), 2)
+        #cv2.drawContours(dst, [best_cnt], 0, (255, 0, 0), 2)
 
         mom = cv2.moments(best_cnt)
-        cx = int(mom['m10'] / mom['m00'])
-        cy = int(mom['m01'] / mom['m00'])
-
-        cv2.circle(dst, (cx, cy), 10, (0, 0, 255), -1)
+        try:
+            cx = int(mom['m10'] / mom['m00'])
+            cy = int(mom['m01'] / mom['m00'])
+            cv2.circle(dst, (cx, cy), 10, (0, 0, 255), -1)
+        except:
+            cx = None
+            cy = None
         return dst, cx, cy
 
     def get_camera_dimensions(self):
@@ -171,9 +175,8 @@ if __name__ == "__main__":
     ret_val, image = camera.read()
 
     image, _ = glove.preprocess_image(image)
-    #image = image.reshape(64, 64)
-    cx, cy = glove.get_hand_center(image)
-    print(cx, cy)
+    dst, cx, cy = glove.get_hand_center(image)
+    #print(cx, cy)
 
     cv2.imshow('window', image)
     cv2.waitKey(0)

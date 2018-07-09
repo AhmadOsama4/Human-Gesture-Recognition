@@ -23,13 +23,14 @@ class ModeController:
         #static_model path
         #model_path = self.configuration_file["static_model_path"]
         model_path = eval( self.configuration_file["static_model_path"] )
-        print("static model path:",model_path)
+        #print("static model path:",model_path)
 
         self.static_model = load_model(model_path)
 
         self.mouse_controller = controllers.MouseController(self.configuration_file)
         self.keyboard_controller = controllers.KeyboardController(self.configuration_file)
         self.dynamic_controller = controllers.DynamicController(self.configuration_file)
+        self.intermediate_controller = controllers.IntermediateController(self.configuration_file)
 
         #add a new glove
         if gloves_name is None:
@@ -65,8 +66,10 @@ class ModeController:
                     ret_val, image = camera.read()
                     image = cv2.flip(image, 1)
                     preprocessed_image, _ = self.gloves.preprocess_image(image)
-                    center = self.gloves.get_hand_center(preprocessed_image)
-                    centers.append(center)
+                    _, center_x, center_y = self.gloves.get_hand_center(preprocessed_image)
+                    if center_x is None or center_y is None:
+                        continue
+                    centers.append((center_x, center_y))
                     action = self.dynamic_controller.take_action(centers)
                     eval(action)
 
@@ -75,31 +78,38 @@ class ModeController:
             else: # predict the static gesture
                 ret_val, image = camera.read()
                 image = cv2.flip(image, 1)
+
                 preprocessed_image, keras_image = self.gloves.preprocess_image(image)
+                dst, center_x, center_y = self.gloves.get_hand_center(preprocessed_image)
+                if center_x is None or center_y is None:
+                    continue
 
                 prediction = self.predict(keras_image)
-                dst, center_x, center_y = self.gloves.get_hand_center(preprocessed_image)
+
                 next_mode = self.current_mode
 
                 print(prediction)
-                self.current_mode = MODE.MOUSE
+                # self.current_mode = MODE.MOUSE
 
                 if self.current_mode == MODE.KEYBOARD:
-                    pass
-                    #next_mode = self.keyboard_controller.take_action(prediction)
+                    next_mode = self.keyboard_controller.take_action(prediction)
                     #(next_mode, action) = self.mouse_controller.take_action(prediction)
                 elif self.current_mode == MODE.MOUSE:
-                    print('Center', center_x, center_y)
+                    #print('Center', center_x, center_y)
                     next_mode = self.mouse_controller.take_action(prediction, center_x, center_y, 640, 480)
                     #(next_mode, action) = self.keyboard_controller.take_action(prediction)
+                elif self.current_mode == MODE.INTERMEDIATE:
+                    next_mode = self.intermediate_controller.take_action(prediction)
                 elif self.current_mode == MODE.DYNAMIC:
                     pass
-                    #next_mode = self.dynamic_controller.take_action(prediction)
+                    next_mode = self.dynamic_controller.take_action(prediction)
                     #(next_mode, action) = self.dynamic_controller.take_action(prediction)
 
                 cv2.imshow('contour', dst)
                 cv2.imshow('result', preprocessed_image)
-                cv2.waitKey(20)
+                if cv2.waitKey(1) & 0xFF == 27:
+                    break
+
                 #eval(action)
                 self.current_mode = next_mode
 

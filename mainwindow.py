@@ -34,7 +34,7 @@ class window(QMainWindow):
             if image[-4:] != '.jpg' and image[-4:] != '.png': #consider jpg images only
                 continue
             glove_name = image[:-4]
-            print(glove_name)
+            #print(glove_name)
             gloves_icon = GlovesIcon(glove_name)
             gloves_icon.clicked.connect(self.gestureSelected)
 
@@ -48,10 +48,10 @@ class window(QMainWindow):
     def gestureSelected(self, gloves_name):
         configuration_file_path = os.path.join(os.getcwd(), "config_file.json")
         if gloves_name == "new_gloves_icon":
-            print('Add a new glove')
+            #print('Add a new glove')
             self.mode_controller = ModeController(configuration_file_path, None)
         else:
-            print('Load a saved glove')
+            #print('Load a saved glove')
             self.mode_controller = ModeController(configuration_file_path, gloves_name)
 
 

@@ -1,11 +1,15 @@
 import pyautogui
+import math
 
 class ComputerController:
 	def __init__(self, controlWindowWidth = 64, controlWindowHeight = 64):
-		self.screenWidth, self.screenHeight = pyautogui.size()
+		self.screen_width, self.screen_height = pyautogui.size()
 		#opencv's window
 		self.controlWindowWidth = controlWindowWidth
 		self.controlWindowHeight = controlWindowHeight
+		self.cur_mouse_x = int(self.screen_width // 2)
+		self.cur_mouse_y = int(self.screen_height // 2)
+		self.moveCursorToCenter()
 
 	def doubleClick(self):
 		pyautogui.doubleClick()
@@ -16,36 +20,28 @@ class ComputerController:
 	def rightClick(self):
 		pyautogui.click(button = 'right')
 
-	def moveCursor(self, dx, dy, scale_x = 1, scale_y = 1):
-		# scale can be calculated from screen resolution and opencv's window resolution
-		cur_mouse_x, cur_mouse_y = pyautogui.position()
+	def moveCursor(self, dx, dy, scale_x = 5, scale_y = 5):
 		dx = dx * scale_x
 		dy = dy * scale_y
 
-		next_mouse_x = int(cur_mouse_x + dx)
-		next_mouse_y = cur_mouse_y + dy
+		next_mouse_x = int(self.screen_width / 2 + dx)
+		next_mouse_y = int(self.screen_height / 2 + dy)
 
 		if next_mouse_x < 0:
-			dx = -cur_mouse_x
-		if next_mouse_x > self.screenWidth:
-			dx = self.screenWidth - cur_mouse_x
+			next_mouse_x = 0
+		if next_mouse_x > self.screen_width:
+			next_mouse_x = self.screen_width
 		if next_mouse_y < 0:
-			dy = -cur_mouse_y
-		if next_mouse_y > self.screenHeight:
-			dx = self.screenHeight - cur_mouse_y
-
-		# if nextMouseX < 0 or nextMouseX >= self.screenWidth or nextMouseY < 0 or nextMouseY >= self.screenHeight:
-		# 	print('New position is outside the screen size, move values are modified')
-		# 	nextMouseX = max(nextMouseX, 0)
-		# 	nextMouseX = min(nextMouseX, self.screenWidth - 1)
-		# 	nextMouseY = max(nextMouseY, 0)
-		# 	nextMouseY = min(nextMouseY, self.screenHeight - 1)
-
-		pyautogui.moveRel(dx, dy)
+			next_mouse_y = 0
+		if next_mouse_y > self.screen_height:
+			next_mouse_y = self.screen_height
+		if math.sqrt((next_mouse_x - self.cur_mouse_x) ** 2 + (next_mouse_y - self.cur_mouse_y) ** 2) > 5:
+			pyautogui.moveTo(next_mouse_x, next_mouse_y)
+			self.cur_mouse_x, self.cur_mouse_y = next_mouse_x, next_mouse_y
 
 	def moveCursorToCenter(self):
-		pyautogui.moveTo(self.screenWidth / 2, self.screenHeight / 2)
-		print(self.screenWidth, self.screenHeight)
+		pyautogui.moveTo(self.screen_width / 2, self.screen_height / 2)
+		#print(self.screenWidth, self.screenHeight)
 
 	def clickUp(self, count = 1):
 		for i in range(count):
